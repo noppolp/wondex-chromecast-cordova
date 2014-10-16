@@ -5,6 +5,10 @@
 
 @implementation Echo
 
+@property GCKApplicationMetadata *applicationMetadata;
+@property GCKDevice *selectedDevice;
+
+
 - (void)echo:(CDVInvokedUrlCommand*)command
 {
     CDVPluginResult* pluginResult = nil;
@@ -36,20 +40,19 @@
 - (void)getDevices:(CDVInvokedUrlCommand*)command{
     CDVPluginResult* pluginResult = nil;
     @try {
-        pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsArray:self.deviceScanner.devices];
+        
+        NSMutableDictionary *deviceDict = [NSMutableDictionary
+                                           dictionaryWithDictionary:@{}];
+        for (GCKDevice *device in self.deviceScanner.devices) {
+            deviceDict[device.deviceID] = device.friendlyName;
+        }
+        
+        pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:deviceDict];
     }
     @catch (NSException *exception) {
         pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:exception.reason];
     }
     @finally {}
-    
-    [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
-}
-
-- (void)getDevicesCount:(CDVInvokedUrlCommand*)command{
-    NSArray *devices = self.deviceScanner.devices;
-    CDVPluginResult* pluginResult = nil;
-    pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsInt:devices.count];
     
     [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
 }
