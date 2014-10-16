@@ -5,9 +5,6 @@
 
 @implementation Echo
 
-@property GCKApplicationMetadata *applicationMetadata;
-@property GCKDevice *selectedDevice;
-
 
 - (void)echo:(CDVInvokedUrlCommand*)command
 {
