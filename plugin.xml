@@ -1,26 +1,36 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<plugin xmlns="http://apache.org/cordova/ns/plugins/1.0"
-        id="toys.wondex.cordova.chromecast" version="0.1">
-    <name>Wondex Cordova ChromeCast</name>
-    <description>Wondex Cordova ChromeCast</description>
-    <keywords>cordova,chromecast</keywords>
-    <js-module src="chromecast.js" name="Chromecast">
-        <clobbers target="chromecast" />
-    </js-module>
-    <platform name="ios">
-        <config-file target="config.xml" parent="/*/plugins">
-            <plugin name="Echo" value="Echo" onload="true" />
-        </config-file>
+<plugin xmlns="http://www.phonegap.com/ns/plugins/1.0"
+    id="com.appgyver.plugin.Echo"
+    version="1.0.0">
 
-        <config-file target="config.xml" parent="/widget">
-            <feature name="Echo">
-                <param name="ios-package" value="Echo"/>
-                <param name="onload" value="true" />
-            </feature>
-        </config-file>
+    <name>EchoPlugin</name>
 
-        <header-file src="src/ios/Echo.h" />
+  <description>
+    Echo Plugin for Steroids.js
+  </description>
 
-        <source-file src="src/ios/Echo.m" />
-    </platform>
+  <asset src="www/chromecast.js" target="plugins/chromecast.js" />
+
+  <engines>
+    <engine name="cordova" version=">=2.7.0" />
+  </engines>
+
+  <!-- ios -->
+  <platform name="ios">
+    <config-file target="config.xml" parent="/*/plugins">
+      <plugin name="Echo" value="Echo" onload="true" />
+    </config-file>
+
+    <config-file target="config.xml" parent="/widget">
+      <feature name="Echo">
+        <param name="ios-package" value="Echo"/>
+        <param name="onload" value="true" />
+      </feature>
+    </config-file>
+
+    <header-file src="src/ios/Echo.h" />
+
+    <source-file src="src/ios/Echo.m" />
+
+  </platform>
 </plugin>
