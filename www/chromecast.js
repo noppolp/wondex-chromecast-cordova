@@ -6,10 +6,14 @@ chromecast.echo = function(str, callback) {
     }, "Echo", "echo", [str]);
 };
 
-chromecast.initCast = function(callback, error) {
-    cordova.exec(callback, error, "Echo", "initCast", []);
+chromecast.initCast = function(receiverAppId, callback, error) {
+    cordova.exec(callback, error, "Echo", "initCast", [receiverAppId]);
 };
 
 chromecast.getDevices = function(callback, error){
     cordova.exec(callback, error, "Echo", "getDevices", []);
+};
+
+chromecast.selectDevice = function(deviceId, callback, error){
+    cordova.exec(callback, error, "Echo", "selectDevice", [deviceId]);
 };
