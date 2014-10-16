@@ -34,9 +34,14 @@
 }
 
 - (void)getDevices:(CDVInvokedUrlCommand*)command{
-    NSArray *devices = self.deviceScanner.devices;
     CDVPluginResult* pluginResult = nil;
-    pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsArray:devices];
+    @try {
+        pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsArray:self.deviceScanner.devices];
+    }
+    @catch (NSException *exception) {
+        pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:exception.reason];
+    }
+    @finally {}
     
     [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
 }
