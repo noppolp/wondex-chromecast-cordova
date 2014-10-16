@@ -49,7 +49,7 @@
 - (void)getDevicesCount:(CDVInvokedUrlCommand*)command{
     NSArray *devices = self.deviceScanner.devices;
     CDVPluginResult* pluginResult = nil;
-    pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsArray:devices.count];
+    pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsInt:devices.count];
     
     [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
 }
