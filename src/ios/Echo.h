@@ -1,5 +1,6 @@
 /********* Echo.h Cordova Plugin Header *******/
 
+#import "WDGCTextChannel.h"
 #import <Cordova/CDV.h>
 #import <GoogleCast/GoogleCast.h>
 
@@ -13,5 +14,6 @@
 - (void)echo:(CDVInvokedUrlCommand*)command;
 - (void)initCast:(CDVInvokedUrlCommand*)command;
 - (void)getDevices:(CDVInvokedUrlCommand*)command;
+- (void)selectDevice:(CDVInvokedUrlCommand*)command;
 
 @end
