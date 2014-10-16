@@ -35,12 +35,11 @@
 
 #pragma mark - GCKDeviceScannerListener
 - (void)deviceDidComeOnline:(GCKDevice *)device {
-  NSLog(@"device found!! %@", device.friendlyName);
-  [self updateButtonStates];
+  
 }
 
 - (void)deviceDidGoOffline:(GCKDevice *)device {
-  [self updateButtonStates];
+  
 }
 
 @end
