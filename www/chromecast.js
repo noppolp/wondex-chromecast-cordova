@@ -17,3 +17,11 @@ chromecast.getDevices = function(callback, error){
 chromecast.selectDevice = function(deviceId, callback, error){
     cordova.exec(callback, error, "Echo", "selectDevice", [deviceId]);
 };
+
+chromecast.isDeviceConnected = function(callback, error){
+    cordova.exec(callback, error, "Echo", "isDeviceConnected", []);
+};
+
+chromecast.getError = function(callback, error){
+    cordova.exec(callback, error, "Echo", "getError", []);
+};

@@ -13,11 +13,14 @@
 @property GCKDevice *selectedDevice;
 @property NSString *receiverAppId;
 @property WDGCTextChannel *textChannel;
+@property NSString *error;
 
 
 - (void)echo:(CDVInvokedUrlCommand*)command;
 - (void)initCast:(CDVInvokedUrlCommand*)command;
 - (void)getDevices:(CDVInvokedUrlCommand*)command;
 - (void)selectDevice:(CDVInvokedUrlCommand*)command;
+- (void)isDeviceConnected:(CDVInvokedUrlCommand*)command;
+- (void)getError:(CDVInvokedUrlCommand*)command;
 
 @end

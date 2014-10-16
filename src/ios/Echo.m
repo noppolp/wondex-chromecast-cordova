@@ -79,6 +79,7 @@
         }
         
         if (selectedDevice != nil) {
+            self.selectedDevice = selectedDevice;
             if (self.deviceManager != nil && self.deviceManager.isConnected) {
                 //Disconnect then connect
                 [self.deviceManager leaveApplication];
@@ -88,14 +89,12 @@
                 [self connectToDevice];
             }else{
                 //Connect
-                self.selectedDevice = selectedDevice;
                 [self connectToDevice];
             }
+            pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:deviceId];
         }else{
             pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"Device id not found"];
         }
-        
-        pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:deviceId];
     } else {
         pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"Empty device id"];
     }
@@ -103,7 +102,22 @@
     [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
 }
 
+- (void)isDeviceConnected:(CDVInvokedUrlCommand*)command{
+    CDVPluginResult* pluginResult = nil;
+    if (self.deviceManager != nil) {
+        pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsBool:self.deviceManager.isConnected];
+    }else{
+        pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsBool:false];
+    }
+    [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+}
 
+- (void)getError:(CDVInvokedUrlCommand*)command{
+    NSString* error = self.error;
+    CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:error];
+    [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+    self.error = @"";
+}
 
 - (BOOL)isConnected {
     return self.deviceManager.isConnected;
@@ -157,21 +171,23 @@ didConnectToCastApplication:(GCKApplicationMetadata *)applicationMetadata
 
 - (void)deviceManager:(GCKDeviceManager *)deviceManager
 didFailToConnectToApplicationWithError:(NSError *)error {
-    //[self showError:error];
+    [self showError:error];
     
     [self deviceDisconnected];
 }
 
 - (void)deviceManager:(GCKDeviceManager *)deviceManager
 didFailToConnectWithError:(GCKError *)error {
-    //[self showError:error];
+    [self showError:error];
     
     [self deviceDisconnected];
 }
 
 - (void)deviceManager:(GCKDeviceManager *)deviceManager
 didDisconnectWithError:(GCKError *)error {
-    
+    if (error != nil) {
+        [self showError:error];
+    }
     [self deviceDisconnected];
     
 }
@@ -179,6 +195,11 @@ didDisconnectWithError:(GCKError *)error {
 - (void)deviceManager:(GCKDeviceManager *)deviceManager
 didReceiveStatusForApplication:(GCKApplicationMetadata *)applicationMetadata {
     self.applicationMetadata = applicationMetadata;
+}
+
+#pragma mark - misc
+- (void)showError:(NSError *)error {
+    self.error = error.description;
 }
 
 @end
