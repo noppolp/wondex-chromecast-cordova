@@ -1,11 +1,15 @@
-window.echo = function(str, callback) {
+var chromecast = {};
+
+chromecast.echo = function(str, callback) {
     cordova.exec(callback, function(err) {
         callback('Nothing to echo.');
     }, "Echo", "echo", [str]);
 };
 
-window.initCast = function(callback) {
-    cordova.exec(callback, function(err) {
-                 callback('Error');
-                 }, "Echo", "initCast", []);
+chromecast.initCast = function(callback, error) {
+    cordova.exec(callback, error, "Echo", "initCast", []);
+}
+
+chromecast.getDevices = function(callback, error){
+    cordova.exec(callback, error, "Echo", "getDevices", []);
 }

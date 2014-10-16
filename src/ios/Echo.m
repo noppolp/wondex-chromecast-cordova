@@ -27,9 +27,17 @@
     [self.deviceScanner addListener:self];
     [self.deviceScanner startScan];
 
-    NSString* result = @"yeah!";
+    NSString* result = @"1";
     pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:result];
 
+    [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+}
+
+- (void)getDevices:(CDVInvokedUrlCommand*)command{
+    NSArray *devices = self.deviceScanner.devices;
+    CDVPluginResult* pluginResult = nil;
+    pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsArray:devices];
+    
     [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
 }
 
