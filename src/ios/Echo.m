@@ -6,11 +6,6 @@
 
 @implementation Echo
 
-    GCKApplicationMetadata *applicationMetadata;
-    GCKDevice *selectedDevice;
-    NSString *receiverAppId;
-    WDGCTextChannel *textChannel;
-
 - (void)echo:(CDVInvokedUrlCommand*)command
 {
     CDVPluginResult* pluginResult = nil;
@@ -73,7 +68,7 @@
     CDVPluginResult* pluginResult = nil;
     NSString* deviceId = [command.arguments objectAtIndex:0];
     
-    if (deviceId != nil && [echo length] > 0) {
+    if (deviceId != nil && [deviceId length] > 0) {
         
         GCKDevice* selectedDevice = nil;
         
@@ -84,16 +79,16 @@
         }
         
         if (selectedDevice != nil) {
-            if (!isConnected) {
-                //Connect
-                self.selectedDevice = selectedDevice;
-                [self connectToDevice];
-            }else{
+            if (self.deviceManager != nil && self.deviceManager.isConnected) {
                 //Disconnect then connect
                 [self.deviceManager leaveApplication];
                 [self.deviceManager disconnect];
                 [self deviceDisconnected];
                 
+                [self connectToDevice];
+            }else{
+                //Connect
+                self.selectedDevice = selectedDevice;
                 [self connectToDevice];
             }
         }else{
@@ -162,14 +157,14 @@ didConnectToCastApplication:(GCKApplicationMetadata *)applicationMetadata
 
 - (void)deviceManager:(GCKDeviceManager *)deviceManager
 didFailToConnectToApplicationWithError:(NSError *)error {
-    [self showError:error];
+    //[self showError:error];
     
     [self deviceDisconnected];
 }
 
 - (void)deviceManager:(GCKDeviceManager *)deviceManager
 didFailToConnectWithError:(GCKError *)error {
-    [self showError:error];
+    //[self showError:error];
     
     [self deviceDisconnected];
 }

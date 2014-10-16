@@ -9,6 +9,10 @@
 @property(nonatomic, strong) GCKDeviceScanner* deviceScanner;
 @property(nonatomic, strong) GCKDeviceManager* deviceManager;
 @property(nonatomic, readonly) GCKMediaInformation* mediaInformation;
+@property GCKApplicationMetadata *applicationMetadata;
+@property GCKDevice *selectedDevice;
+@property NSString *receiverAppId;
+@property WDGCTextChannel *textChannel;
 
 
 - (void)echo:(CDVInvokedUrlCommand*)command;
