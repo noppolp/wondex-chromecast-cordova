@@ -8,8 +8,7 @@
 @property(nonatomic, strong) GCKDeviceScanner* deviceScanner;
 @property(nonatomic, strong) GCKDeviceManager* deviceManager;
 @property(nonatomic, readonly) GCKMediaInformation* mediaInformation;
-@property GCKApplicationMetadata *applicationMetadata;
-@property GCKDevice *selectedDevice;
+
 
 - (void)echo:(CDVInvokedUrlCommand*)command;
 - (void)initCast:(CDVInvokedUrlCommand*)command;
