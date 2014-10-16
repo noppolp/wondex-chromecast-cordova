@@ -13,3 +13,7 @@ chromecast.initCast = function(callback, error) {
 chromecast.getDevices = function(callback, error){
     cordova.exec(callback, error, "Echo", "getDevices", []);
 }
+
+chromecast.getDevicesCount = function(callback, error){
+    cordova.exec(callback, error, "Echo", "getDevicesCount", []);
+}
