@@ -73,7 +73,7 @@
         GCKDevice* selectedDevice = nil;
         
         for (GCKDevice *device in self.deviceScanner.devices) {
-            if (device.deviceID == deviceId) {
+            if ([device.deviceID isEqualToString:deviceId]) {
                 selectedDevice = device;
             }
         }
