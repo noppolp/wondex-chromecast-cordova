@@ -92,7 +92,7 @@
     [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
 }
 
-- (void)disconnectDevice(CDVInvokedUrlCommand*)command
+- (void)disconnectDevice:(CDVInvokedUrlCommand*)command
 {
     [self.deviceManager leaveApplication];
     [self.deviceManager disconnect];
