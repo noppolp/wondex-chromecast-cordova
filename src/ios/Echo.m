@@ -34,8 +34,7 @@
         [self.deviceScanner addListener:self];
         [self.deviceScanner startScan];
         
-        NSString* result = @"1";
-        pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:result];
+        pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsBool:true];
     } else {
         pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"Empty receiverAppId"];
     }
@@ -80,17 +79,8 @@
         
         if (selectedDevice != nil) {
             self.selectedDevice = selectedDevice;
-            if (self.deviceManager != nil && self.deviceManager.isConnected) {
-                //Disconnect then connect
-                [self.deviceManager leaveApplication];
-                [self.deviceManager disconnect];
-                [self deviceDisconnected];
-                
-                [self connectToDevice];
-            }else{
-                //Connect
-                [self connectToDevice];
-            }
+            [self connectToDevice];
+            
             pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:deviceId];
         }else{
             pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"Device id not found"];
@@ -99,6 +89,14 @@
         pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"Empty device id"];
     }
     
+    [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+}
+
+- (void)disconnectDevice(CDVInvokedUrlCommand*)command{
+    [self.deviceManager leaveApplication];
+    [self.deviceManager disconnect];
+    [self deviceDisconnected];
+    CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsBool:true];
     [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
 }
 
@@ -117,6 +115,19 @@
     CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:error];
     [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
     self.error = @"";
+}
+
+- (void)sendText:(CDVInvokedUrlCommand*)command{
+    CDVPluginResult* pluginResult = nil;
+    
+    if (!self.deviceManager || !self.deviceManager.isConnected) {
+        pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:@"Device is not connected"];
+    }else{
+        NSString* msg = [command.arguments objectAtIndex:0];
+        [self.textChannel sendTextMessage:msg];
+        pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsBool:true];
+    }
+    [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
 }
 
 - (BOOL)isConnected {

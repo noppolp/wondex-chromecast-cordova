@@ -20,7 +20,9 @@
 - (void)initCast:(CDVInvokedUrlCommand*)command;
 - (void)getDevices:(CDVInvokedUrlCommand*)command;
 - (void)selectDevice:(CDVInvokedUrlCommand*)command;
+- (void)disconnectDevice(CDVInvokedUrlCommand*)command
 - (void)isDeviceConnected:(CDVInvokedUrlCommand*)command;
 - (void)getError:(CDVInvokedUrlCommand*)command;
+- (void)sendText:(CDVInvokedUrlCommand*)command;
 
 @end
