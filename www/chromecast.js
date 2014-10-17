@@ -1,4 +1,5 @@
 var chromecast = {};
+var wakeUpInterval;
 
 chromecast.echo = function(str, callback) {
     cordova.exec(callback, function(err) {
@@ -16,9 +17,13 @@ chromecast.getDevices = function(callback, error){
 
 chromecast.selectDevice = function(deviceId, callback, error){
     cordova.exec(callback, error, "Echo", "selectDevice", [deviceId]);
+    wakeUpInterval = setInterval(function(){
+                                 chromecast.sendText('...', function(){}, function(){});
+                                 }, 2000);
 };
 
 chromecast.disconnectDevice = function(callback, error){
+    clearInterval(wakeUpInterval);
     cordova.exec(callback, error, "Echo", "disconnectDevice", []);
 };
 
