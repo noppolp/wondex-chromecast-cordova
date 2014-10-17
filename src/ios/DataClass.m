@@ -25,3 +25,5 @@ static DataClass *instance = nil;
     }
     return instance;
 }
+
+@end
