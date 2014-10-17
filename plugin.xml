@@ -32,7 +32,9 @@
         <source-file src="src/ios/Echo.m"/>
         <header-file src="src/ios/WDGCTextChannel.h"/>
         <source-file src="src/ios/WDGCTextChannel.m"/>
-
+        <header-file src="src/ios/DataClass.h"/>
+        <source-file src="src/ios/DataClass.m"/>
+        
         <framework src="src/ios/Frameworks/GoogleCast.framework" custom="true"/>
         <framework src="SystemConfiguration.framework"/>
         <framework src="MediaAccessibility.framework"/>

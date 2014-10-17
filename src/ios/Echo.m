@@ -2,6 +2,7 @@
 
 #import "Echo.h"
 #import "WDGCTextChannel.h"
+#import "DataClass.h"
 #import <Cordova/CDV.h>
 
 @implementation Echo
@@ -22,17 +23,18 @@
 
 - (void)initCast:(CDVInvokedUrlCommand*)command
 {
+    DataClass *data=[DataClass getInstance];
     CDVPluginResult* pluginResult = nil;
 
     NSString* receiverAppId = [command.arguments objectAtIndex:0];
     
     if (receiverAppId != nil && [receiverAppId length] > 0) {
 
-        self.receiverAppId = receiverAppId;
+        data.receiverAppId = receiverAppId;
         
-        self.deviceScanner = [[GCKDeviceScanner alloc] init];
-        [self.deviceScanner addListener:self];
-        [self.deviceScanner startScan];
+        data.deviceScanner = [[GCKDeviceScanner alloc] init];
+        [data.deviceScanner addListener:self];
+        [data.deviceScanner startScan];
         
         pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsBool:true];
     } else {
@@ -43,12 +45,13 @@
 }
 
 - (void)getDevices:(CDVInvokedUrlCommand*)command{
+    DataClass *data=[DataClass getInstance];
     CDVPluginResult* pluginResult = nil;
     @try {
         
         NSMutableDictionary *deviceDict = [NSMutableDictionary
                                            dictionaryWithDictionary:@{}];
-        for (GCKDevice *device in self.deviceScanner.devices) {
+        for (GCKDevice *device in data.deviceScanner.devices) {
             deviceDict[device.deviceID] = device.friendlyName;
         }
         
@@ -64,6 +67,7 @@
 
 - (void)selectDevice:(CDVInvokedUrlCommand*)command
 {
+    DataClass *data=[DataClass getInstance];
     CDVPluginResult* pluginResult = nil;
     NSString* deviceId = [command.arguments objectAtIndex:0];
     
@@ -71,14 +75,14 @@
         
         GCKDevice* selectedDevice = nil;
         
-        for (GCKDevice *device in self.deviceScanner.devices) {
+        for (GCKDevice *device in data.deviceScanner.devices) {
             if ([device.deviceID isEqualToString:deviceId]) {
                 selectedDevice = device;
             }
         }
         
         if (selectedDevice != nil) {
-            self.selectedDevice = selectedDevice;
+            data.selectedDevice = selectedDevice;
             [self connectToDevice];
             
             pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:deviceId];
@@ -94,17 +98,19 @@
 
 - (void)disconnectDevice:(CDVInvokedUrlCommand*)command
 {
-    [self.deviceManager leaveApplication];
-    [self.deviceManager disconnect];
+    DataClass *data=[DataClass getInstance];
+    [data.deviceManager leaveApplication];
+    [data.deviceManager disconnect];
     [self deviceDisconnected];
     CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsBool:true];
     [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
 }
 
 - (void)isDeviceConnected:(CDVInvokedUrlCommand*)command{
+    DataClass *data=[DataClass getInstance];
     CDVPluginResult* pluginResult = nil;
-    if (self.deviceManager != nil) {
-        pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsBool:self.deviceManager.isConnected];
+    if (data.deviceManager != nil) {
+        pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsBool:data.deviceManager.isConnected];
     }else{
         pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsBool:false];
     }
@@ -112,45 +118,50 @@
 }
 
 - (void)getError:(CDVInvokedUrlCommand*)command{
-    NSString* error = self.error;
+    DataClass *data=[DataClass getInstance];
+    NSString* error = data.error;
     CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:error];
     [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
-    self.error = @"";
+    data.error = @"";
 }
 
 - (void)sendText:(CDVInvokedUrlCommand*)command{
+    DataClass *data=[DataClass getInstance];
     CDVPluginResult* pluginResult = nil;
     
-    if (!self.deviceManager || !self.deviceManager.isConnected) {
+    if (!data.deviceManager || !data.deviceManager.isConnected) {
         pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:@"Device is not connected"];
     }else{
         NSString* msg = [command.arguments objectAtIndex:0];
-        [self.textChannel sendTextMessage:msg];
+        [data.textChannel sendTextMessage:msg];
         pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsBool:true];
     }
     [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
 }
 
 - (BOOL)isConnected {
-    return self.deviceManager.isConnected;
+    DataClass *data=[DataClass getInstance];
+    return data.deviceManager.isConnected;
 }
 
 - (void)connectToDevice {
-    if (self.selectedDevice == nil)
+    DataClass *data=[DataClass getInstance];
+    if (data.selectedDevice == nil)
         return;
     
     NSDictionary *info = [[NSBundle mainBundle] infoDictionary];
-    self.deviceManager =
-    [[GCKDeviceManager alloc] initWithDevice:self.selectedDevice
+    data.deviceManager =
+    [[GCKDeviceManager alloc] initWithDevice:data.selectedDevice
                            clientPackageName:[info objectForKey:@"CFBundleIdentifier"]];
-    self.deviceManager.delegate = self;
-    [self.deviceManager connect];
+    data.deviceManager.delegate = self;
+    [data.deviceManager connect];
 }
 
 - (void)deviceDisconnected {
-    self.textChannel = nil;
-    self.deviceManager = nil;
-    self.selectedDevice = nil;
+    DataClass *data=[DataClass getInstance];
+    data.textChannel = nil;
+    data.deviceManager = nil;
+    data.selectedDevice = nil;
 }
 
 #pragma mark - GCKDeviceScannerListener
@@ -166,9 +177,9 @@
 #pragma mark - GCKDeviceManagerDelegate
 
 - (void)deviceManagerDidConnect:(GCKDeviceManager *)deviceManager {
-    
+    DataClass *data=[DataClass getInstance];
     //launch application after getting connectted
-    [self.deviceManager launchApplication:self.receiverAppId];
+    [data.deviceManager launchApplication:data.receiverAppId];
 }
 
 - (void)deviceManager:(GCKDeviceManager *)deviceManager
@@ -176,13 +187,18 @@ didConnectToCastApplication:(GCKApplicationMetadata *)applicationMetadata
             sessionID:(NSString *)sessionID
   launchedApplication:(BOOL)launchedApplication {
     
-    self.textChannel =
+    DataClass *data=[DataClass getInstance];
+    
+    data.textChannel =
     [[WDGCTextChannel alloc] initWithNamespace:@"urn:x-cast:toys.wondex.cast"];
-    [self.deviceManager addChannel:self.textChannel];
+    [data.deviceManager addChannel:data.textChannel];
 }
 
 - (void)deviceManager:(GCKDeviceManager *)deviceManager
 didFailToConnectToApplicationWithError:(NSError *)error {
+    
+    DataClass *data=[DataClass getInstance];
+    
     [self showError:error];
     
     [self deviceDisconnected];
@@ -190,6 +206,9 @@ didFailToConnectToApplicationWithError:(NSError *)error {
 
 - (void)deviceManager:(GCKDeviceManager *)deviceManager
 didFailToConnectWithError:(GCKError *)error {
+    
+    DataClass *data=[DataClass getInstance];
+    
     [self showError:error];
     
     [self deviceDisconnected];
@@ -197,6 +216,9 @@ didFailToConnectWithError:(GCKError *)error {
 
 - (void)deviceManager:(GCKDeviceManager *)deviceManager
 didDisconnectWithError:(GCKError *)error {
+    
+    DataClass *data=[DataClass getInstance];
+    
     if (error != nil) {
         [self showError:error];
     }
@@ -206,12 +228,18 @@ didDisconnectWithError:(GCKError *)error {
 
 - (void)deviceManager:(GCKDeviceManager *)deviceManager
 didReceiveStatusForApplication:(GCKApplicationMetadata *)applicationMetadata {
-    self.applicationMetadata = applicationMetadata;
+    
+    DataClass *data=[DataClass getInstance];
+    
+    data.applicationMetadata = applicationMetadata;
 }
 
 #pragma mark - misc
 - (void)showError:(NSError *)error {
-    self.error = error.description;
+    
+    DataClass *data=[DataClass getInstance];
+    
+    data.error = error.description;
 }
 
 @end
