@@ -7,6 +7,8 @@
 
 @implementation Echo
 
+@property (strong, nonatomic) UIView *inputAccessoryView;
+
 - (void)echo:(CDVInvokedUrlCommand*)command
 {
     CDVPluginResult* pluginResult = nil;
