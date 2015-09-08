@@ -1,18 +1,25 @@
 // Copyright 2013 Google Inc.
 
 #import "GCKCastChannel.h"
+#import "GCKMediaCommon.h"
 
 @class GCKMediaInformation;
+@class GCKMediaQueueItem;
 @class GCKMediaStatus;
 @class GCKMediaTextTrackStyle;
 
 @protocol GCKMediaControlChannelDelegate;
 
 /**
+ * @file GCKMediaControlChannel.h
+ * GCKMediaControlChannelResumeState enum.
+ */
+
+/**
  * The receiver application ID for the Default Media Receiver.
  *
  * Any operations which apply to a currently active stream (play, pause, seek, stop, etc) require
- * a valid (that is, non-nil) media status, or they will return |kGCKInvalidRequestID| and will
+ * a valid (that is, non-nil) media status, or they will return kGCKInvalidRequestID and will
  * not send the request. A media status is requested automatically when the channel connects, is
  * included with a successful load completed respose, and can also be updated at any time.
  * The media status can also become nil at any time; this will happen if the channel is
@@ -23,23 +30,6 @@
  * while the media status is non-nil.
  */
 GCK_EXTERN NSString *const kGCKMediaDefaultReceiverApplicationID;
-
-typedef NS_ENUM(NSInteger, GCKMediaControlChannelResumeState) {
-  /** A resume state indicating that the player state should be left unchanged. */
-  GCKMediaControlChannelResumeStateUnchanged = 0,
-
-  /**
-   * A resume state indicating that the player should be playing, regardless of its current
-   * state.
-   */
-  GCKMediaControlChannelResumeStatePlay = 1,
-
-  /**
-   * A resume state indicating that the player should be paused, regardless of its current
-   * state.
-   */
-  GCKMediaControlChannelResumeStatePause = 2,
-};
 
 /**
  * A CastChannel for media control operations.
@@ -62,7 +52,7 @@ GCK_EXPORT
 /**
  * Designated initializer.
  */
-- (id)init;
+- (instancetype)init;
 
 /**
  * Loads and starts playback of a new media item.
@@ -145,7 +135,8 @@ GCK_EXPORT
  * Sets the active tracks. Request will fail if there is no current media status.
  *
  * @param activeTrackIDs An array of integers (as NSNumbers) specifying the active tracks.
- * @return The request ID, or kGCKInvalidRequestID if the message could not be sent.
+ * @return The request ID, or kGCKInvalidRequestID if the message could not be sent. May
+ * be nil or an empty array to set the active tracks to the empty list.
  */
 - (NSInteger)setActiveTrackIDs:(NSArray *)activeTrackIDs;
 
@@ -207,19 +198,19 @@ GCK_EXPORT
 - (NSInteger)playWithCustomData:(id)customData;
 
 /**
- * Seeks to a new time within the current media item. Request will fail if there is no current
+ * Seeks to a new position within the current media item. Request will fail if there is no current
  * media status.
  *
- * @param position The new time interval from the beginning of the stream.
+ * @param position The new position from the beginning of the stream.
  * @return The request ID, or kGCKInvalidRequestID if the message could not be sent.
  */
-- (NSInteger)seekToTimeInterval:(NSTimeInterval)timeInterval;
+- (NSInteger)seekToTimeInterval:(NSTimeInterval)position;
 
 /**
  * Seeks to a new position within the current media item. Request will fail if there is no current
  * media status.
  *
- * @param position The new time interval from the beginning of the stream.
+ * @param position The new position interval from the beginning of the stream.
  * @param resumeState The action to take after the seek operation has finished.
  * @return The request ID, or kGCKInvalidRequestID if the message could not be sent.
  */
@@ -230,7 +221,7 @@ GCK_EXPORT
  * Seeks to a new position within the current media item. Request will fail if there is no current
  * media status.
  *
- * @param position The time interval from the beginning of the stream.
+ * @param position The new position from the beginning of the stream.
  * @param resumeState The action to take after the seek operation has finished.
  * @param customData Custom application-specific data to pass along with the request. Must either
  * be an object that can be serialized to JSON using NSJSONSerialization, or nil.
@@ -239,6 +230,222 @@ GCK_EXPORT
 - (NSInteger)seekToTimeInterval:(NSTimeInterval)position
                     resumeState:(GCKMediaControlChannelResumeState)resumeState
                      customData:(id)customData;
+
+/**
+ * Loads and optionally starts playback of a new queue of media items.
+ *
+ * @param queueItems An array of GCKMediaQueueItem%s to load. Must not be nil or empty.
+ * @param startIndex The index of the item in the items array that should be played first.
+ * @param repeatMode The repeat mode for playing the queue.
+ * @return The request ID for this request, or kGCKInvalidRequestID if the message could not be
+ * sent or if any of the parameters are invalid.
+ */
+- (NSInteger)queueLoadItems:(NSArray *)queueItems
+                 startIndex:(NSUInteger)startIndex
+                 repeatMode:(GCKMediaRepeatMode)repeatMode;
+
+/**
+ * Loads and optionally starts playback of a new queue of media items.
+ *
+ * @param queueItems An array of GCKMediaQueueItem%s to load. Must not be nil or empty.
+ * @param startIndex The index of the item in the items array that should be played first.
+ * @param repeatMode The repeat mode for playing the queue.
+ * @param customData Custom application-specific data to pass along with the request. Must either
+ * be an object that can be serialized to JSON using NSJSONSerialization, or nil.
+ * @return The request ID for this request, or kGCKInvalidRequestID if the message could not be
+ * sent or if any of the parameters are invalid.
+ */
+- (NSInteger)queueLoadItems:(NSArray *)queueItems
+                 startIndex:(NSUInteger)startIndex
+                 repeatMode:(GCKMediaRepeatMode)repeatMode
+                 customData:(id)customData;
+
+/**
+ * Inserts a list of new media items into the queue.
+ *
+ * @param queueItems An array of GCKMediaQueueItem%s to insert. Must not be nil or empty.
+ * @param beforeItemID The ID of the item that will be located immediately after the inserted list.
+ * If the value is kGCKMediaQueueInvalidItemID, the inserted list will be appended to the end of the
+ * queue.
+ * @return The request ID for this request, or kGCKInvalidRequestID if the message could not be
+ * sent or if any of the parameters are invalid.
+ */
+- (NSInteger)queueInsertItems:(NSArray *)queueItems
+             beforeItemWithID:(NSUInteger)beforeItemID;
+
+/**
+ * Inserts a list of new media items into the queue.
+ *
+ * @param queueItems An array of GCKMediaQueueItem%s to insert. Must not be nil or empty.
+ * @param beforeItemID ID of the item that will be located immediately after the inserted list. If
+ * the value is kGCKMediaQueueInvalidItemID, the inserted list will be appended to the end of the
+ * queue.
+ * @param customData Custom application-specific data to pass along with the request. Must either
+ * be an object that can be serialized to JSON using NSJSONSerialization, or nil.
+ * @return The request ID for this request, or kGCKInvalidRequestID if the message could not be
+ * sent or if any of the parameters are invalid.
+ */
+- (NSInteger)queueInsertItems:(NSArray *)queueItems
+             beforeItemWithID:(NSUInteger)beforeItemID
+                   customData:(id)customData;
+
+/**
+ * A convenience method that inserts a single item into the queue.
+ *
+ * @param item The item to insert.
+ * @param beforeItemID The ID of the item that will be located immediately after the inserted item.
+ * If the value is kGCKMediaQueueInvalidItemID, or does not refer to any item currently in the
+ * queue, the inserted item will be appended to the end of the queue.
+ * @return The request ID for this request, or kGCKInvalidRequestID if the message could not be
+ * sent or if any of the parameters are invalid.
+ */
+- (NSInteger)queueInsertItem:(GCKMediaQueueItem *)item
+            beforeItemWithID:(NSUInteger)beforeItemID;
+
+/**
+ * Updates the queue.
+ *
+ * @param queueItems The list of updated items.
+ * @return The request ID for this request, or kGCKInvalidRequestID if the message could not be
+ * sent or if any of the parameters are invalid.
+ */
+- (NSInteger)queueUpdateItems:(NSArray *)queueItems;
+
+/**
+ * Updates the queue.
+ *
+ * @param queueItems The list of updated items.
+ * @param customData Custom application-specific data to pass along with the request. Must either
+ * be an object that can be serialized to JSON using NSJSONSerialization, or nil.
+ * @return The request ID for this request, or kGCKInvalidRequestID if the message could not be
+ * sent or if any of the parameters are invalid.
+ */
+- (NSInteger)queueUpdateItems:(NSArray *)queueItems
+                   customData:(id)customData;
+
+/**
+ * Removes a list of media items from the queue. If the queue becomes empty as a result, the current
+ * media session will be terminated.
+ *
+ * @param itemIDs An array of media item IDs identifying the items to remove. Must not be nil or
+ * empty.
+ * @return The request ID for this request, or kGCKInvalidRequestID if the message could not be
+ * sent or if any of the parameters are invalid.
+ */
+- (NSInteger)queueRemoveItemsWithIDs:(NSArray *)itemIDs;
+
+/**
+ * Removes a list of media items from the queue. If the queue becomes empty as a result, the current
+ * media session will be terminated.
+ *
+ * @param itemIDs An array of media item IDs identifying the items to remove. Must not be nil or
+ * empty.
+ * @param customData Custom application-specific data to pass along with the request. Must either
+ * be an object that can be serialized to JSON using NSJSONSerialization, or nil.
+ * @return The request ID for this request, or kGCKInvalidRequestID if the message could not be
+ * sent or if any of the parameters are invalid.
+ */
+- (NSInteger)queueRemoveItemsWithIDs:(NSArray *)itemIDs
+                          customData:(id)customData;
+
+/**
+ * A convenience method that removes a single item from the queue.
+ *
+ * @param itemID The ID of the item to remove.
+ * @return The request ID for this request, or kGCKInvalidRequestID if the message could not be
+ * sent or if any of the parameters are invalid.
+ */
+- (NSInteger)queueRemoveItemWithID:(NSUInteger)itemID;
+
+/**
+ * Reorders a list of media items in the queue.
+ *
+ * @param queueItemIDs An array of media item IDs identifying the items to reorder. Must not be nil
+ * or empty.
+ * @param beforeItemID ID of the item that will be located immediately after the reordered list. If
+ * the value is kGCKMediaQueueInvalidItemID, or does not refer to any item currently in the queue,
+ * the reordered list will be appended at the end of the queue.
+ * @return The request ID for this request, or kGCKInvalidRequestID if the message could not be
+ * sent or if any of the parameters are invalid.
+ */
+- (NSInteger)queueReorderItemsWithIDs:(NSArray *)queueItemIDs
+               insertBeforeItemWithID:(NSUInteger)beforeItemID;
+
+/**
+ * Reorder a list of media items in the queue.
+ *
+ * @param queueItemIDs An array of media item IDs identifying the items to reorder. Must not be nil
+ * or empty.
+ * @param beforeItemID The ID of the item that will be located immediately after the reordered list.
+ * If the value is kGCKMediaQueueInvalidItemID, or does not refer to any item currently in the
+ * queue, the reordered list will be moved to the end of the queue.
+ * @param customData Custom application-specific data to pass along with the request. Must either
+ * be an object that can be serialized to JSON using NSJSONSerialization, or nil.
+ * @return The request ID for this request, or kGCKInvalidRequestID if the message could not be
+ * sent or if any of the parameters are invalid.
+ */
+- (NSInteger)queueReorderItemsWithIDs:(NSArray *)queueItemIDs
+               insertBeforeItemWithID:(NSUInteger)beforeItemID
+                           customData:(id)customData;
+
+/**
+ * A convenience method that moves a single item in the queue.
+ *
+ * @param itemID The ID of the item to move.
+ * @param beforeItemID The ID of the item that will be located immediately after the reordered list.
+ * If the value is kGCKMediaQueueInvalidItemID, or does not refer to any item currently in the
+ * queue, the item will be moved to the end of the queue.
+ * @return The request ID for this request, or kGCKInvalidRequestID if the message could not be
+ * sent or if any of the parameters are invalid.
+ */
+- (NSInteger)queueMoveItemWithID:(NSUInteger)itemID
+                beforeItemWithID:(NSUInteger)beforeItemID;
+
+/**
+ * Jumps to the item with the specified ID in the queue.
+ *
+ * @param itemID The ID of the item to jump to.
+ * @return The request ID for this request, or kGCKInvalidRequestID if the message could not be
+ * sent.
+ */
+- (NSInteger)queueJumpToItemWithID:(NSUInteger)itemID;
+
+/**
+ * Jumps to the item with the specified ID in the queue.
+ *
+ * @param itemID The ID of the item to jump to.
+ * @param customData Custom application-specific data to pass along with the request. Must either
+ * be an object that can be serialized to JSON using NSJSONSerialization, or nil.
+ * @return The request ID for this request, or kGCKInvalidRequestID if the message could not be
+ * sent.
+ */
+- (NSInteger)queueJumpToItemWithID:(NSUInteger)itemID
+                        customData:(id)customData;
+
+/**
+ * Moves to the next item in the queue.
+ *
+ * @return The request ID for this request, or kGCKInvalidRequestID if the message could not be
+ * sent.
+ */
+- (NSInteger)queueNextItem;
+
+/**
+ * Moves to the previous item in the queue.
+ *
+ * @return The request ID for this request, or kGCKInvalidRequestID if the message could not be
+ * sent.
+ */
+- (NSInteger)queuePreviousItem;
+
+/**
+ * Sets the queue repeat mode.
+ *
+ * @param repeatMode The new repeat mode.
+ * @return The request ID for this request, or kGCKInvalidRequestID if the message could not be
+ * sent or if any of the parameters are invalid.
+ */
+- (NSInteger)queueSetRepeatMode:(GCKMediaRepeatMode)repeatMode;
 
 /**
  * Sets the stream volume. Request will fail if there is no current media status.
@@ -291,6 +498,17 @@ GCK_EXPORT
  */
 - (NSTimeInterval)approximateStreamPosition;
 
+/**
+ * Cancels an in-progress request. Cancelling a request does not prevent it from being executed;
+ * it simply indicates that the calling application is no longer interested in the results of the
+ * request, so any state associated with the tracking of the request will be cleared.
+ *
+ * @param requestID The ID of the request to cancel.
+ * @return YES if the request was cancelled, or NO if there is no request being tracked with the
+ * given ID.
+ */
+- (BOOL)cancelRequestWithID:(NSInteger)requestID;
+
 @end
 
 /**
@@ -304,30 +522,53 @@ GCK_EXPORT
 /**
  * Called when a request to load media has completed.
  *
- * @param mediaSessionId The unique media session ID that has been assigned to this media item.
+ * @param mediaControlChannel The channel.
+ * @param sessionID The unique media session ID that has been assigned to this media item.
  */
 - (void)mediaControlChannel:(GCKMediaControlChannel *)mediaControlChannel
     didCompleteLoadWithSessionID:(NSInteger)sessionID;
 
 /**
  * Called when a request to load media has failed.
+ *
+ * @param mediaControlChannel The channel.
+ * @param error The load error.
  */
 - (void)mediaControlChannel:(GCKMediaControlChannel *)mediaControlChannel
     didFailToLoadMediaWithError:(NSError *)error;
 
 /**
  * Called when updated player status information is received.
+ *
+ * @param mediaControlChannel The channel.
  */
 - (void)mediaControlChannelDidUpdateStatus:(GCKMediaControlChannel *)mediaControlChannel;
 
 /**
+ * Called when updated queue status information is received.
+ *
+ * @param mediaControlChannel The channel.
+ */
+- (void)mediaControlChannelDidUpdateQueue:(GCKMediaControlChannel *)mediaControlChannel;
+
+/**
+ * Called when updated preload status is received.
+ *
+ * @param mediaControlChannel The channel.
+ */
+- (void)mediaControlChannelDidUpdatePreloadStatus:(GCKMediaControlChannel *)mediaControlChannel;
+
+/**
  * Called when updated media metadata is received.
+ *
+ * @param mediaControlChannel The channel.
  */
 - (void)mediaControlChannelDidUpdateMetadata:(GCKMediaControlChannel *)mediaControlChannel;
 
 /**
  * Called when a request succeeds.
  *
+ * @param mediaControlChannel The channel.
  * @param requestID The request ID that failed. This is the ID returned when the request was made.
  */
 - (void)mediaControlChannel:(GCKMediaControlChannel *)mediaControlChannel
@@ -337,6 +578,7 @@ GCK_EXPORT
  * Called when a request is no longer being tracked because another request of the same type has
  * been issued by the application.
  *
+ * @param mediaControlChannel The channel.
  * @param requestID The request ID that has been replaced. This is the ID returned when the request
  * was made.
  */
@@ -344,8 +586,19 @@ GCK_EXPORT
     didReplaceRequestWithID:(NSInteger)requestID;
 
 /**
+ * Called when a request is no longer being tracked because it has been explicitly cancelled.
+ *
+ * @param mediaControlChannel The channel.
+ * @param requestID The request ID that has been cancelled. This is the ID returned when the request
+ * was made.
+ */
+- (void)mediaControlChannel:(GCKMediaControlChannel *)mediaControlChannel
+    didCancelRequestWithID:(NSInteger)requestID;
+
+/**
  * Called when a request fails.
  *
+ * @param mediaControlChannel The channel.
  * @param requestID The request ID that failed. This is the ID returned when the request was made.
  * @param error The error. If any custom data was associated with the error, it will be in the
  * error's userInfo dictionary with the key {@code kGCKErrorCustomDataKey}.

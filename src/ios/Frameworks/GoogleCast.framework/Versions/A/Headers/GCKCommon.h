@@ -5,12 +5,23 @@
 #import "GCKDefines.h"
 
 /**
+ * @file GCKCommon.h
+ * GCKActiveInputStatus and GCKStandbyStatus enums.
+ */
+
+/**
  * An invalid request ID; if a method returns this request ID, it means that the request could
  * not be made.
  */
 GCK_EXTERN const NSInteger kGCKInvalidRequestID;
 
 /**
+ * A string constant containing the version number of the GoogleCast framework.
+ */
+GCK_EXTERN const NSString *kGCKFrameworkVersion;
+
+/**
+ * @enum GCKActiveInputStatus
  * An enum describing the active input status states.
  */
 typedef NS_ENUM(NSInteger, GCKActiveInputStatus) {
@@ -29,6 +40,7 @@ typedef NS_ENUM(NSInteger, GCKActiveInputStatus) {
 };
 
 /**
+ * @enum GCKStandbyStatus
  * An enum describing the standby status states.
  */
 typedef NS_ENUM(NSInteger, GCKStandbyStatus) {
@@ -45,3 +57,6 @@ typedef NS_ENUM(NSInteger, GCKStandbyStatus) {
    */
   GCKStandbyStatusActive = 1,
 };
+
+#define GCK_ASSERT_MAIN_THREAD() \
+  NSAssert([NSThread isMainThread], @"%s must be called on main thread", __PRETTY_FUNCTION__)

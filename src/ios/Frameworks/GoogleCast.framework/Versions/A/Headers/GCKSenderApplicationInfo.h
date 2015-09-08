@@ -8,6 +8,7 @@ typedef NS_ENUM(NSInteger, GCKSenderApplicationInfoPlatform) {
   GCKSenderApplicationInfoPlatformAndroid = 1,
   GCKSenderApplicationInfoPlatformiOS = 2,
   GCKSenderApplicationInfoPlatformChrome = 3,
+  GCKSenderApplicationInfoPlatformOSX = 4,
 };
 
 /**

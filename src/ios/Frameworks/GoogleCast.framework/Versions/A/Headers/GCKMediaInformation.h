@@ -5,6 +5,15 @@
 @class GCKMediaMetadata;
 @class GCKMediaTextTrackStyle;
 
+/**
+ * @file GCKMediaInformation.h
+ * GCKMediaStreamType enum.
+ */
+
+/**
+ * @enum GCKMediaStreamType
+ * Enum defining the media stream type.
+ */
 typedef NS_ENUM(NSInteger, GCKMediaStreamType) {
   /** A stream type of "none". */
   GCKMediaStreamTypeNone = 0,
@@ -22,7 +31,7 @@ typedef NS_ENUM(NSInteger, GCKMediaStreamType) {
  * @ingroup MediaControl
  */
 GCK_EXPORT
-@interface GCKMediaInformation : NSObject
+@interface GCKMediaInformation : NSObject<NSCopying>
 
 /**
  * The content ID for this stream.
@@ -45,7 +54,7 @@ GCK_EXPORT
 @property(nonatomic, strong, readonly) GCKMediaMetadata *metadata;
 
 /**
- * The length of time for the stream, in seconds.
+ * The length of the stream, in seconds, or <code>INFINITY</code> if it is a live stream.
  */
 @property(nonatomic, readonly) NSTimeInterval streamDuration;
 
@@ -72,16 +81,18 @@ GCK_EXPORT
  * @param contentType The content (MIME) type.
  * @param metadata The media item metadata.
  * @param streamDuration The stream duration.
+ * @param mediaTracks The media tracks, if any, otherwise <code>nil</code>.
+ * @param textTrackStyle The text track style, if any, otherwise <code>nil</code>.
  * @param customData The custom application-specific data.
  */
-- (id)initWithContentID:(NSString *)contentID
-             streamType:(GCKMediaStreamType)streamType
-            contentType:(NSString *)contentType
-               metadata:(GCKMediaMetadata *)metadata
-         streamDuration:(NSTimeInterval)streamDuration
-            mediaTracks:(NSArray *)mediaTracks
-         textTrackStyle:(GCKMediaTextTrackStyle *)textTrackStyle
-             customData:(id)customData;
+- (instancetype)initWithContentID:(NSString *)contentID
+                       streamType:(GCKMediaStreamType)streamType
+                      contentType:(NSString *)contentType
+                         metadata:(GCKMediaMetadata *)metadata
+                   streamDuration:(NSTimeInterval)streamDuration
+                      mediaTracks:(NSArray *)mediaTracks
+                   textTrackStyle:(GCKMediaTextTrackStyle *)textTrackStyle
+                       customData:(id)customData;
 
 /**
  * Legacy initializer; does not include media tracks or text track style.
@@ -94,11 +105,11 @@ GCK_EXPORT
  * @param customData Custom application-specific data. Must either be an object that can be
  * serialized to JSON using NSJSONSerialization, or nil.
  */
-- (id)initWithContentID:(NSString *)contentID
-             streamType:(GCKMediaStreamType)streamType
-            contentType:(NSString *)contentType
-               metadata:(GCKMediaMetadata *)metadata
-         streamDuration:(NSTimeInterval)streamDuration
-             customData:(id)customData;
+- (instancetype)initWithContentID:(NSString *)contentID
+                       streamType:(GCKMediaStreamType)streamType
+                      contentType:(NSString *)contentType
+                         metadata:(GCKMediaMetadata *)metadata
+                   streamDuration:(NSTimeInterval)streamDuration
+                       customData:(id)customData;
 
 @end

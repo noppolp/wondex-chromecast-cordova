@@ -51,4 +51,13 @@ GCK_EXPORT
 + (BOOL)isJSONString:(NSString *)actual
         equivalentTo:(NSString *)expected;
 
+/**
+ * Tests if two JSON objects are equivalent. This does a deep comparison of the JSON data in the
+ * two objects, but ignores any differences in the ordering of keys within a JSON object. For
+ * example, <code>{ "width":64, "height":32 }</code> is considered to be equivalent to
+ * <code>{ "height":32, "width":64 }</code>.
+ */
++ (BOOL)isJSONObject:(id)actual
+        equivalentTo:(id)expected;
+
 @end

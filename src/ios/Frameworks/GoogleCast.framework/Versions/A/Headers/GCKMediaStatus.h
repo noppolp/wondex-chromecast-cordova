@@ -3,8 +3,15 @@
 #import <Foundation/Foundation.h>
 
 #import "GCKDefines.h"
+#import "GCKMediaCommon.h"
 
 @class GCKMediaInformation;
+@class GCKMediaQueueItem;
+
+/**
+ * @file GCKMediaStatus.h
+ * GCKMediaPlayerState and GCKMediaPlayerIdleReason enums.
+ */
 
 /** A flag (bitmask) indicating that a media item can be paused. */
 GCK_EXTERN const NSInteger kGCKMediaCommandPause;
@@ -24,6 +31,19 @@ GCK_EXTERN const NSInteger kGCKMediaCommandSkipForward;
 /** A flag (bitmask) indicating that a media item supports skipping backward. */
 GCK_EXTERN const NSInteger kGCKMediaCommandSkipBackward;
 
+/** A flag (bitmask) indicating that a media item supports moving to the next item in the queue. */
+GCK_EXTERN const NSInteger kGCKMediaCommandQueueNext;
+
+/**
+ * A flag (bitmask) indicating that a media item supports moving to the previous item in the
+ * queue.
+ */
+GCK_EXTERN const NSInteger kGCKMediaCommandQueuePrevious;
+
+/**
+ * @enum GCKMediaPlayerState
+ * Media player states.
+ */
 typedef NS_ENUM(NSInteger, GCKMediaPlayerState) {
   /** Constant indicating unknown player state. */
   GCKMediaPlayerStateUnknown = 0,
@@ -37,6 +57,10 @@ typedef NS_ENUM(NSInteger, GCKMediaPlayerState) {
   GCKMediaPlayerStateBuffering = 4,
 };
 
+/**
+ * @enum GCKMediaPlayerIdleReason
+ * Media player idle reasons.
+ */
 typedef NS_ENUM(NSInteger, GCKMediaPlayerIdleReason) {
   /** Constant indicating that the player currently has no idle reason. */
   GCKMediaPlayerIdleReasonNone = 0,
@@ -66,7 +90,7 @@ typedef NS_ENUM(NSInteger, GCKMediaPlayerIdleReason) {
  * @ingroup MediaControl
  */
 GCK_EXPORT
-@interface GCKMediaStatus : NSObject
+@interface GCKMediaStatus : NSObject<NSCopying>
 
 /**
  * The media session ID for this item.
@@ -112,6 +136,26 @@ GCK_EXPORT
 @property(nonatomic, readonly) BOOL isMuted;
 
 /**
+ * The current queue repeat mode.
+ */
+@property(nonatomic, readonly) GCKMediaRepeatMode queueRepeatMode;
+
+/**
+ * The ID of the current queue item, if any.
+ */
+@property(nonatomic, readonly) NSUInteger currentItemID;
+
+/**
+ * The ID of the item that is currently preloaded, if any.
+ */
+@property(nonatomic, readonly) NSUInteger preloadedItemID;
+
+/**
+ * The ID of the item that is currently loading, if any.
+ */
+@property(nonatomic, readonly) NSUInteger loadingItemID;
+
+/**
  * The list of active track IDs. Each element of the array is an NSNumber containing an integer
  * track ID.
  */
@@ -128,12 +172,27 @@ GCK_EXPORT
  * @param mediaSessionID The media session ID.
  * @param mediaInformation The media information.
  */
-- (id)initWithSessionID:(NSInteger)mediaSessionID
-       mediaInformation:(GCKMediaInformation *)mediaInformation;
+- (instancetype)initWithSessionID:(NSInteger)mediaSessionID
+                 mediaInformation:(GCKMediaInformation *)mediaInformation;
 
 /**
  * Checks if the stream supports a given control command.
  */
 - (BOOL)isMediaCommandSupported:(NSInteger)command;
+
+/**
+ * Returns the number of items in the playback queue.
+ */
+- (NSUInteger)queueItemCount;
+
+/**
+ * Returns the item at the specified index in the playback queue.
+ */
+- (GCKMediaQueueItem *)queueItemAtIndex:(NSUInteger)index;
+
+/**
+ * Returns the item with the given item ID in the playback queue.
+ */
+- (GCKMediaQueueItem *)queueItemWithItemID:(NSUInteger)itemID;
 
 @end
